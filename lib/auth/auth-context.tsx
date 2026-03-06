@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!resolvedRef.current && session) applySessionResult(session);
         return;
       }
+      // Ignore auth events that don't change session (e.g. failed login can fire noise)
       if (session) {
         setAuthState({
           user: sessionToUser(session),

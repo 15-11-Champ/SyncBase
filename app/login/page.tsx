@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/auth-context';
 import Link from 'next/link';
@@ -27,31 +27,36 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [formLoading, setFormLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const submittingRef = useRef(false);
+  const hasRedirectedRef = useRef(false);
 
-  // Auto-redirect if already logged in (use auth loading so we don't redirect before session is known)
+  // Auto-redirect if already logged in — run only once when we know we're authenticated
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      router.replace('/appointments/book');
-    }
+    if (authLoading || !isAuthenticated || hasRedirectedRef.current) return;
+    hasRedirectedRef.current = true;
+    router.replace('/appointments/book');
   }, [isAuthenticated, authLoading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setFormLoading(true);
     setError('');
 
     try {
       const { success, error: loginError } = await login(email, password);
       if (success) {
-        // Full page navigation so middleware and auth see fresh cookies; avoids client-side race
+        hasRedirectedRef.current = true;
         window.location.href = '/appointments/book';
-      } else {
-        setError(loginError || 'Invalid email or password');
+        return;
       }
+      setError(loginError || 'Invalid email or password');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
       setFormLoading(false);
+      submittingRef.current = false;
     }
   };
 
