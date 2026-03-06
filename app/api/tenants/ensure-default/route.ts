@@ -76,7 +76,7 @@ export async function POST(request: Request) {
             .upsert(
                 {
                     id: user.id,
-                    full_name: (user.user_metadata?.full_name as string) || user.email ?? undefined,
+                    full_name: ((user.user_metadata?.full_name as string) || user.email) ?? undefined,
                     current_tenant_id: tenant.id,
                 },
                 { onConflict: 'id' }
