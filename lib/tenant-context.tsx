@@ -87,9 +87,34 @@ export function TenantProvider({ children }: { children: ReactNode }) {
                 // Don't return, just continue with empty tenants so app doesn't hang
             }
 
-            const userTenants = (memberships || [])
+            let userTenants = (memberships || [])
                 .map((m: any) => m.tenants)
                 .filter(Boolean) as Tenant[];
+
+            // If user has no tenants (e.g. created before per-user trigger or trigger failed), ensure a default one
+            if (userTenants.length === 0) {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session?.access_token) {
+                        const res = await fetch('/api/tenants/ensure-default', {
+                            method: 'POST',
+                            headers: { Authorization: `Bearer ${session.access_token}` },
+                        });
+                        if (res.ok) {
+                            const membershipRetry = await supabase
+                                .from('tenant_members')
+                                .select(`tenant_id, role, tenants (id, name, slug, domain, plan, status, settings)`)
+                                .eq('user_id', user.id)
+                                .eq('status', 'active');
+                            userTenants = (membershipRetry.data || [])
+                                .map((m: any) => m.tenants)
+                                .filter(Boolean) as Tenant[];
+                        }
+                    }
+                } catch (ensureErr) {
+                    console.error('Ensure default tenant failed:', ensureErr);
+                }
+            }
 
             setTenants(userTenants);
 
