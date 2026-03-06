@@ -20,40 +20,52 @@ const Logo = () => (
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { user, isAuthenticated } = useAuth();
 
-  // Auto-redirect if already logged in
+  // Auto-redirect if already logged in (use auth loading so we don't redirect before session is known)
   useEffect(() => {
-    if (!loading && isAuthenticated) {
+    if (!authLoading && isAuthenticated) {
       router.replace('/appointments/book');
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setFormLoading(true);
     setError('');
 
     try {
       const { success, error: loginError } = await login(email, password);
       if (success) {
+        // Full page navigation so middleware and auth see fresh cookies; avoids client-side race
         window.location.href = '/appointments/book';
       } else {
         setError(loginError || 'Invalid email or password');
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fdfdfd]">
+        <div className="mb-10">
+          <Logo />
+        </div>
+        <div className="animate-pulse text-[#0052CC] font-semibold">Checking session...</div>
+        <div className="mt-3 w-8 h-8 border-2 border-[#0052CC]/20 border-t-[#0052CC] rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#fdfdfd]">
@@ -116,10 +128,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={formLoading}
             className="w-full bg-[#0052CC] text-white p-4 rounded-2xl font-bold text-sm hover:bg-[#0041a3] shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {formLoading ? 'Signing In...' : 'Sign In'}
           </button>
 
 

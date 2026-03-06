@@ -29,6 +29,7 @@ export default function SignupPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [emailConfirmationRequired, setEmailConfirmationRequired] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
     const handleSignup = async (e: React.FormEvent) => {
@@ -37,18 +38,19 @@ export default function SignupPage() {
         setError('');
 
         try {
-            const { success: signupSuccess, error: signupError } = await signUp(email, password, name);
+            const { success: signupSuccess, error: signupError, requiresEmailConfirmation } = await signUp(email, password, name);
 
             if (signupSuccess) {
                 setSuccess(true);
+                setEmailConfirmationRequired(!!requiresEmailConfirmation);
                 setTimeout(() => {
                     router.push('/login');
                 }, 3000);
             } else {
                 setError(signupError || 'An error occurred during sign up');
             }
-        } catch (err: any) {
-            setError(err.message || 'An error occurred during sign up');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'An error occurred during sign up');
         } finally {
             setLoading(false);
         }
@@ -68,7 +70,9 @@ export default function SignupPage() {
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900">Account Created!</h2>
                     <p className="text-gray-500">
-                        Welcome to SyncBase. We've linked you to our demo organization. Redirecting to login...
+                        {emailConfirmationRequired
+                            ? "We've sent a confirmation link to your email. Please check your inbox and confirm your account, then sign in. Redirecting to login..."
+                            : "Welcome to SyncBase. We've linked you to our demo organization. Redirecting to login..."}
                     </p>
                 </div>
             </div>
