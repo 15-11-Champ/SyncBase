@@ -19,7 +19,7 @@ const Logo = () => (
 );
 
 /** After this many ms, hide loading and show a timeout message */
-const SIGNIN_TIMEOUT_MS = 15_000;
+const SIGNIN_TIMEOUT_MS = 10000;
 
 export default function LoginPage() {
   const router = useRouter();

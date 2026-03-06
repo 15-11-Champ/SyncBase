@@ -24,6 +24,7 @@ export default function SignupPage() {
     const { signUp } = useAuth();
 
     const [name, setName] = useState('');
+    const [businessName, setBusinessName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -38,7 +39,7 @@ export default function SignupPage() {
         setError('');
 
         try {
-            const { success: signupSuccess, error: signupError, requiresEmailConfirmation } = await signUp(email, password, name);
+            const { success: signupSuccess, error: signupError, requiresEmailConfirmation } = await signUp(email, password, name, businessName);
 
             if (signupSuccess) {
                 setSuccess(true);
@@ -72,7 +73,7 @@ export default function SignupPage() {
                     <p className="text-gray-500">
                         {emailConfirmationRequired
                             ? "We've sent a confirmation link to your email. Please check your inbox and confirm your account, then sign in. Redirecting to login..."
-                            : "Welcome to SyncBase. We've linked you to our demo organization. Redirecting to login..."}
+                            : "Welcome to SyncBase. Your business has been set up. Redirecting to login..."}
                     </p>
                 </div>
             </div>
@@ -109,6 +110,18 @@ export default function SignupPage() {
                                 placeholder="John Doe"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
+                                required
+                                className="w-full p-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm"
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Business Name</label>
+                            <input
+                                type="text"
+                                placeholder="My Salon"
+                                value={businessName}
+                                onChange={(e) => setBusinessName(e.target.value)}
                                 required
                                 className="w-full p-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm"
                             />

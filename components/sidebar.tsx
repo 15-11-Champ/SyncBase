@@ -51,44 +51,7 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
 
-        {/* Appointments */}
-        <div className="space-y-1">
-          <Button
-            variant="ghost"
-            onClick={() => setAppointmentsOpen(!appointmentsOpen)}
-            className="w-full justify-between gap-3"
-          >
-            <span className="flex items-center gap-3">
-              <Calendar className="w-4 h-4" />
-              Appointments
-            </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${appointmentsOpen ? 'rotate-180' : ''}`} />
-          </Button>
-
-          {appointmentsOpen && (
-            <div className="ml-4 space-y-1 border-l">
-              <Link href="/appointments/book">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-sm pl-4"
-                >
-                  <Calendar className="w-3 h-3" />
-                  Book Appointments
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Clients */}
-        <Link href="/clients">
-          <Button variant="ghost" className="w-full justify-start gap-3">
-            <Users className="w-4 h-4" />
-            Clients
-          </Button>
-        </Link>
-
-        {/* Dashboard */}
+        {/* Dashboard - first */}
         {isAdmin && (
           <div className="space-y-1">
             <Button
@@ -128,6 +91,43 @@ export default function Sidebar() {
             )}
           </div>
         )}
+
+        {/* Appointments */}
+        <div className="space-y-1">
+          <Button
+            variant="ghost"
+            onClick={() => setAppointmentsOpen(!appointmentsOpen)}
+            className="w-full justify-between gap-3"
+          >
+            <span className="flex items-center gap-3">
+              <Calendar className="w-4 h-4" />
+              Appointments
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${appointmentsOpen ? 'rotate-180' : ''}`} />
+          </Button>
+
+          {appointmentsOpen && (
+            <div className="ml-4 space-y-1 border-l">
+              <Link href="/appointments/book">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-sm pl-4"
+                >
+                  <Calendar className="w-3 h-3" />
+                  Book Appointments
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Customers */}
+        <Link href="/clients">
+          <Button variant="ghost" className="w-full justify-start gap-3">
+            <Users className="w-4 h-4" />
+            Customers
+          </Button>
+        </Link>
 
         {/* Staff */}
         <div className="space-y-1">

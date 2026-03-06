@@ -9,7 +9,7 @@ const SESSION_CHECK_TIMEOUT_MS = 10_000;
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (email: string, password: string, name?: string) => Promise<{ success: boolean; error?: string; requiresEmailConfirmation?: boolean }>;
+  signUp: (email: string, password: string, name?: string, businessName?: string) => Promise<{ success: boolean; error?: string; requiresEmailConfirmation?: boolean }>;
   logout: () => void;
   retrySession: () => Promise<void>;
 }
@@ -138,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true };
   };
 
-  const signUp = async (email: string, password: string, name?: string) => {
+  const signUp = async (email: string, password: string, name?: string, businessName?: string) => {
     console.log('Attempting signUp for:', email);
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -146,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: {
         data: {
           full_name: name,
+          business_name: businessName,
         },
       },
     });

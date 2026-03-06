@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         }
 
         const slug = 'org-' + user.id.replace(/-/g, '')
-        const name = (user.user_metadata?.full_name as string) || user.email?.split('@')[0] || 'My Organization'
+        const name = (user.user_metadata?.business_name as string) || (user.user_metadata?.full_name as string) || user.email?.split('@')[0] || 'My Organization'
 
         const { data: tenant, error: tenantError } = await supabase
             .from('tenants')

@@ -16,7 +16,9 @@ DECLARE
 BEGIN
   -- Unique slug from user id (no collision possible)
   tenant_slug := 'org-' || REPLACE(NEW.id::TEXT, '-', '');
+  -- Prefer business_name (from signup), then full_name, then email prefix
   tenant_name := COALESCE(
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'business_name'), ''),
     NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''),
     split_part(NEW.email, '@', 1),
     'My Organization'
