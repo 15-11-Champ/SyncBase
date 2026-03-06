@@ -18,6 +18,9 @@ const Logo = () => (
   </svg>
 );
 
+/** After this many ms, hide loading and show a timeout message */
+const SIGNIN_TIMEOUT_MS = 15_000;
+
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, loading: authLoading } = useAuth();
@@ -29,6 +32,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const submittingRef = useRef(false);
   const hasRedirectedRef = useRef(false);
+  const signinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-redirect if already logged in — run only once when we know we're authenticated
   useEffect(() => {
@@ -37,15 +41,39 @@ export default function LoginPage() {
     router.replace('/appointments/book');
   }, [isAuthenticated, authLoading, router]);
 
+  useEffect(() => {
+    return () => {
+      if (signinTimeoutRef.current) clearTimeout(signinTimeoutRef.current);
+    };
+  }, []);
+
+  const clearSigninTimeout = () => {
+    if (signinTimeoutRef.current) {
+      clearTimeout(signinTimeoutRef.current);
+      signinTimeoutRef.current = null;
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current) return;
     submittingRef.current = true;
     setFormLoading(true);
     setError('');
+    clearSigninTimeout();
+
+    signinTimeoutRef.current = setTimeout(() => {
+      signinTimeoutRef.current = null;
+      submittingRef.current = false;
+      setFormLoading(false);
+      setError(
+        'Sign-in is taking too long. Please check your connection and try again. If the problem continues, your email or password may be incorrect.'
+      );
+    }, SIGNIN_TIMEOUT_MS);
 
     try {
       const { success, error: loginError } = await login(email, password);
+      clearSigninTimeout();
       if (success) {
         hasRedirectedRef.current = true;
         window.location.href = '/appointments/book';
@@ -53,6 +81,7 @@ export default function LoginPage() {
       }
       setError(loginError || 'Invalid email or password');
     } catch (err: unknown) {
+      clearSigninTimeout();
       setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
       setFormLoading(false);
